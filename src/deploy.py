@@ -96,7 +96,8 @@ class Deploy:
             "test.py",
             "README.md",
             "mlflow.db",
-            "exported_model"
+            "exported_model",
+            "mlruns",
         ]
 
         for i in files:
@@ -207,19 +208,19 @@ class Deploy:
         if status == "SUCCESS":
             print("Docker worked perfectly. Deployng it in Azure Container Instance")
             da = DeployAzure(ssh)
-            # try:
-            da.deploy_acr()
-            # except Exception as e:
-            #     raise f"Error in deploying acr: {e}"
+            try:
+                da.deploy_acr()
+            except Exception as e:
+                raise f"Error in deploying acr: {e}"
             
-            # try:
-            da.deploy_aci()
-            # except Exception as e:
-            #     raise f"Error in deploying aci: {e}"
+            try:
+                da.deploy_aci()
+            except Exception as e:
+                raise f"Error in deploying aci: {e}"
         else:
             print("Docker Image not working properly. Please check the logs and fix the issue.")
 
-
-# Initialize and run deployment pipeline
-deploy = Deploy()
-deploy()
+if __name__ == "__main__":
+    # Initialize and run deployment pipeline
+    deploy = Deploy()
+    deploy()
