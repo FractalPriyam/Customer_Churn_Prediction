@@ -15,6 +15,7 @@ import mlflow
 from pydantic import BaseModel
 from typing import Literal
 from utils import Utils
+import pandas as pd
 
 
 # Initialize FastAPI application
@@ -101,31 +102,27 @@ async def predict(input_data: dict):
     """
     try:
         sm = ServeModel("ChurnPredictionModel")
-        pred = sm(input_data)
+        pred, proba = sm(input_data)
     except Exception as e:
-        try:
-            loaded_model = mlflow.pyfunc.load_model(config["local_model_path"])
-            pred = loaded_model.predict(input_data)
-        except:
-            return {
-                "error": (
-                    "No model available to predict. "
-                    "Please train a model first (use /train api)."
-                )
-            }
+        return {
+            "error": (
+                "No model available to predict. Exported model not found at local path. "
+                "Please train a model first (use /train api)."
+            )
+        }
     
     # Generate predictions using the served model
-    print(pred)
+    
+    print(pred, proba)
     
     # Convert numeric predictions (0/1) to human-readable strings
-    predictions = []
-    for i in pred:
-        if(i == 1):
-            predictions.append("Yes")
-        else:        
-            predictions.append("No")
+    if(pred[0] == 1):
+        prediction = "Yes"
+    else:        
+        prediction = "No"
     
     return {
-        "input_data": input_data,
-        "prediction": predictions
+        # "input_data": input_data,
+        "prediction": prediction,
+        "churn_probability": proba[0]
         }
