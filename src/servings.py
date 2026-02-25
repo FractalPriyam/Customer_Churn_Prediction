@@ -11,6 +11,7 @@ import mlflow.pyfunc
 import pandas as pd
 from mlflow.tracking import MlflowClient
 from data_ingestion import DataIngestion
+from utils import Utils
 
 
 class ServeModel:
@@ -27,19 +28,24 @@ class ServeModel:
     def __init__(self, model_name:str, train:bool=False):
         self.model_name = model_name
         client = MlflowClient()
+        self.config = Utils().load_config()
 
         # Only load a model if not in training mode
         if not train:
             # Retrieve the latest production-stage model version
-            latest_versions = client.get_latest_versions(model_name, stages=["Production"])
-            if not latest_versions:
-                raise ValueError(f"No production version found for model: {model_name}")
-            else:
+            try:
+                latest_versions = client.get_latest_versions(model_name, stages=["Production"])
                 self.model_version = latest_versions[0].version
                 self.model_uri = f"models:/{self.model_name}/{self.model_version}"
                 # Load the model using MLflow's generic Python model interface
-                self.model = mlflow.pyfunc.load_model(self.model_uri)
+                self.model = mlflow.sklearn.load_model(self.model_uri)
                 print(f"Loading model from: {self.model_uri}")
+            except Exception as e:
+                try:
+                    self.model = mlflow.sklearn.load_model(self.config["local_model_path"])
+                    print(f"Loading model from local path: {self.config['local_model_path']}")
+                except Exception as e:
+                    raise ValueError(f"Error loading model from MLflow or local path. Error: {e}")
 
     def predict_data(self, df: pd.DataFrame) -> list:
         """Validate, preprocess, and generate predictions for a DataFrame.
@@ -58,9 +64,10 @@ class ServeModel:
 
         # Run inference using the loaded model
         prediction = self.model.predict(df)
+        proba = self.model.predict_proba(df)[:, 1]  # Assuming binary classification, get probability of positive class
 
         # Convert numpy array to list for JSON serialization
-        return prediction.tolist()
+        return prediction, proba
 
     def train_model(self)-> None:
         """Trigger a complete model training and registration workflow.
@@ -86,7 +93,7 @@ class ServeModel:
         df = pd.DataFrame([data])
 
         # Delegate to predict_data for validation and inference
-        prediction = self.predict_data(df)
+        prediction, proba = self.predict_data(df)
 
-        return prediction
+        return prediction, proba
 
