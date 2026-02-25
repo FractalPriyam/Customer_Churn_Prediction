@@ -21,6 +21,8 @@ This system implements a robust MLOps workflow where every stage is managed by a
 ├── mlflow.db                      # SQLite Database for MLflow Tracking (Local Registry)
 ├── mlruns                         # Folder storing MLflow artifacts (Models, Plots)
 ├── exported_model/                # (Generated) Stores the model artifacts for the Docker container
+├── test.py/                        # To test container on Linux server(Change port number to test in .env file)
+├── test_azure_api.py               # Test api after deployment(Change IP to test)
 └── src/
     ├── data_ingestion.py          # Step 1: Loads raw data from source (CSV/DB)
     ├── data_validation.py           # Step 2: Validates schema using Great Expectations
