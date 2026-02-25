@@ -1,0 +1,92 @@
+# ==============================================================================
+# Data Pipeline Configuration
+# ==============================================================================
+# Paths to data files at each stage of the pipeline
+data:
+    raw_data: data/raw/Telco-Customer-Churn.csv          # Original CSV from source
+    validated_data: data/validated/Telco-Customer-Churn.csv  # After schema validation
+    processed_data: data/processed/Telco-Customer-Churn.csv  # After preprocessing
+
+# ==============================================================================
+# MLflow Configuration
+# ==============================================================================
+# URI for MLflow tracking backend (experiments, runs, models)
+ml_tracing_url: "sqlite:///mlflow.db"
+
+# ==============================================================================
+# Model Selection and Hyperparameter Tuning Configuration
+# ==============================================================================
+# List of model types to tune and compare in the tournament
+models_to_evaluate: ["logistic_regression", "xgboost", "random_forest"]  
+
+# Optuna hyperparameter optimization settings
+optuna:
+  n_trials: 15                    # Number of trials per model
+  metric: "roc_auc"               # Metric to optimize (for reference)
+  direction: "maximize"           # Optimization direction: 'maximize' or 'minimize'
+
+# Registered model name in MLflow Model Registry
+model_name: "ChurnPredictionModel"
+
+local_model_path: "exported_model/"  # Local path to save the model for Docker build
+
+#Docker image name for deployment (used in deploy.py and Azure Container Registry)
+docker_image_name: "priyam_churnprediction"
+
+# ==============================================================================
+# XGBoost Model Configuration
+# ==============================================================================
+xgboost:
+  # Base hyperparameters (used as defaults in trials)
+  params:
+    objective: "binary:logistic"     # Binary classification objective
+    tree_method: "hist"              # Histogram-based tree construction (fast)
+    eval_metric: "auc"               # Evaluation metric during training
+    n_jobs: -1                        # Use all CPU cores
+  
+  # Hyperparameter search space for Optuna sampling
+  # Format: [min_value, max_value]
+  search_space:
+    n_estimators: [300, 2000]         # Number of boosting trees
+    max_depth: [3, 10]                # Maximum tree depth
+    learning_rate: [0.00001, 0.001]   # Step size shrinkage
+    subsample: [0.6, 1.0]             # Fraction of samples per tree
+    colsample_bytree: [0.6, 1.0]      # Fraction of features per tree
+    gamma: [0, 5]                     # Minimum loss reduction for split
+    scale_pos_weight_multipliers: [1.2, 3.0]  # Multipliers for class imbalance handling
+
+
+# ==============================================================================
+# Random Forest Model Configuration
+# ==============================================================================
+random_forest:
+  # Base hyperparameters
+  params:
+    n_jobs: -1                    # Use all CPU cores for parallel tree building
+    random_state: 21              # Seed for reproducibility
+  
+  # Hyperparameter search space for Optuna sampling
+  search_space:
+    n_estimators: [200, 1000]     # Number of trees in the forest
+    max_depth: [5, 35]            # Maximum tree depth
+    min_samples_split: [2, 20]    # Minimum samples needed to split a node
+    min_samples_leaf: [3, 15]     # Minimum samples required at a leaf node
+    max_features: ["sqrt", "log2"]  # Features to consider for splits
+    class_weight: ["balanced", "balanced_subsample"]  # Handle class imbalance
+    criterion: ['gini', 'entropy']  # Split quality measure
+
+# ==============================================================================
+# Logistic Regression Configuration
+# ==============================================================================
+logistic_regression:
+  # Base hyperparameters
+  params:
+    solver: "saga"                 # Stochastic average gradient descent solver
+    max_iter: 6000                 # Maximum iterations (saga requires more)
+    random_state: 42               # Seed for reproducibility
+  
+  # Hyperparameter search space for Optuna sampling
+  search_space:
+    C: [0.001, 10.0]               # Inverse regularization strength (smaller = stronger)
+    penalty: ["l1", "l2", "elasticnet"]  # L1 (Lasso), L2 (Ridge), or ElasticNet
+    l1_ratio: [0.0, 1.0]           # Mix ratio for ElasticNet (0=L2, 1=L1)

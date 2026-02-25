@@ -1,0 +1,12 @@
+#Python environment
+.venv/
+desktop.ini
+
+# data
+data/raw/
+data/processed/
+data/validated/
+
+# models
+mlruns/
+.env

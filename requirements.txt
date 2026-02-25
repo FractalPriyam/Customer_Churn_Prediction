@@ -1,0 +1,13 @@
+numpy==2.2.6
+pandas==2.3.3
+pyyaml==6.0.3
+jupyter
+seaborn==0.13.2
+scikit-learn==1.7.2
+pydantic==2.12.5
+mlflow==3.10.0
+xgboost==3.2.0
+imblearn
+optuna==4.7.0
+dotenv
+paramiko==4.0.0
