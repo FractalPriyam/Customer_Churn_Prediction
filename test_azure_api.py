@@ -1,5 +1,5 @@
 import requests
-url = "http://52.254.58.235:8100"
+url = "http://20.69.207.102:8100"
 
 def test_api(data):
     api = f"{url}/predict"
