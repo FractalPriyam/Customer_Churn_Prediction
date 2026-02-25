@@ -1,6 +1,7 @@
+import os
 import requests
 
-BASE_URL = "http://127.0.0.1:8108"
+BASE_URL = f"http://127.0.0.1:5001"
 
 def test_predict(data):
     """Tests the /predict endpoint"""
@@ -39,33 +40,33 @@ def test_train_model():
 
 if __name__ == "__main__":
     # First, check if the API is healthy
-    check_health()
+    # check_health()
     # response = test_check_model()
     # if('error' not in response.json()):
-    #     sample_customer = {
-    #         "customerID": "7590-VHVEG",
-    #         "gender": "Female",
-    #         "SeniorCitizen": 0,
-    #         "Partner": "Yes",
-    #         "Dependents": "No",
-    #         "tenure": 1,
-    #         "PhoneService": "No",
-    #         "MultipleLines": "No phone service",
-    #         "InternetService": "DSL",
-    #         "OnlineSecurity": "No",
-    #         "OnlineBackup": "Yes",
-    #         "DeviceProtection": "No",
-    #         "TechSupport": "No",
-    #         "StreamingTV": "No",
-    #         "StreamingMovies": "No",
-    #         "Contract": "Month-to-month",
-    #         "PaperlessBilling": "Yes",
-    #         "PaymentMethod": "Electronic check",
-    #         "MonthlyCharges": 29.85,
-    #         "TotalCharges": 29.85
-    #     }
+    sample_customer = {
+        "customerID": "7590-VHVEG",
+        "gender": "Female",
+        "SeniorCitizen": 0,
+        "Partner": "Yes",
+        "Dependents": "No",
+        "tenure": 1,
+        "PhoneService": "No",
+        "MultipleLines": "No phone service",
+        "InternetService": "DSL",
+        "OnlineSecurity": "No",
+        "OnlineBackup": "Yes",
+        "DeviceProtection": "No",
+        "TechSupport": "No",
+        "StreamingTV": "No",
+        "StreamingMovies": "No",
+        "Contract": "Month-to-month",
+        "PaperlessBilling": "Yes",
+        "PaymentMethod": "Electronic check",
+        "MonthlyCharges": 29.85,
+        "TotalCharges": 29.85
+    }
 
-    #     test_predict(sample_customer)
-    
-    # else:
-    #     test_train_model()
+    test_predict(sample_customer)
+
+# else:
+    # test_train_model()
